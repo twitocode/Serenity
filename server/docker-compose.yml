@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  server:
+    container_name: serenity-server
+    build:
+      dockerfile: Dockerfile
+      context: .
+      network: host
+    env_file:
+      - .env
+    depends_on:
+      postgresDb:
+        condition: service_healthy
+    ports:
+      - "3000:8000"
+    volumes:
+      - .:/app
+    command: go run cmd/main.go
+
+  postgresDb:
+    image: postgres:alpine
+    container_name: serenity-postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - postgresData:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${DB_USER} -d ${DB_NAME}'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # migrate:
+  #   image: migrate/migrate
+  #   container_name: serenity-migration
+  #   depends_on:
+  #     postgresDb:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./server/db/migrations:/database
+  #   command:
+  #     [
+  #       "-path",
+  #       "/database",
+  #       "-database",
+  #       "postgresql://${DB_USER}:${DB_PASSWORD}@postgresDb:5432/${DB_NAME}?sslmode=disable",
+  #       "-verbose",
+  #       "up",
+  #     ]
+volumes:
+  postgresData:
