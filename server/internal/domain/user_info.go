@@ -8,6 +8,7 @@ type UserInfo struct {
 	Avatar      string
 	AccessToken *oauth2.Token
 	Provider    string
+	Password    string
 }
 
 type DiscordUser struct {

@@ -14,4 +14,6 @@ type UserRepository interface {
 	GetUserIdByEmail(ctx context.Context, email string) (int, error)
 	GetUserByEmail(ctx context.Context, email string) (*domain.User, error)
   CreateAccountWithInfo(ctx context.Context, info *domain.UserInfo, userId int) (int, error) 
+  GetUserIdByDisplayName(ctx context.Context, displayName string) (int, error) 
+  GetUserPasswordByIdentifier(ctx context.Context, identifier string) (*domain.User, error) 
 }

@@ -14,5 +14,7 @@ type OauthService interface {
 }
 
 type AuthService interface {
-	Login(ctx context.Context, info *domain.UserInfo) (int, error)
+	ExternalLogin(ctx context.Context, info *domain.UserInfo) (int, error)
+	Register(ctx context.Context, body *domain.RegisterUserRequest) (int, error)
+	Login(ctx context.Context, body *domain.LoginUserRequest) (int, error)
 }

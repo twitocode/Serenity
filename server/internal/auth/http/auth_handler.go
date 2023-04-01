@@ -9,6 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/novaiiee/serenity/config"
 	"github.com/novaiiee/serenity/internal/auth"
+	"github.com/novaiiee/serenity/internal/domain"
 	"github.com/novaiiee/serenity/pkg/utils"
 	"golang.org/x/oauth2"
 )
@@ -54,7 +55,7 @@ func (s *authHandler) ExternalProviderCallback() http.HandlerFunc {
 			return
 		}
 
-		id, err := s.as.Login(r.Context(), userInfo)
+		id, err := s.as.ExternalLogin(r.Context(), userInfo)
 
 		if err != nil {
 			s.logger.Error(err)
@@ -79,9 +80,9 @@ func (s *authHandler) ExternalProviderCallback() http.HandlerFunc {
 	}
 }
 
-func (s *authHandler) LoginWithEmailPassword() http.HandlerFunc {
+func (s *authHandler) RegisterWithEmailPassword() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var body RegisterUserRequest
+		var body domain.RegisterUserRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			log.Error(err)
@@ -89,11 +90,74 @@ func (s *authHandler) LoginWithEmailPassword() http.HandlerFunc {
 			return
 		}
 
-		if err := body.Validate(); err != nil {
+		if err := utils.ValidateStruct(body); err != nil {
 			log.Error(err)
 			w.Write([]byte(err.Error()))
+			return
 		}
 
-		json.NewEncoder(w).Encode(body)
+		id, err := s.as.Register(r.Context(), &body)
+
+		if err != nil {
+			log.Error(err)
+			w.Write([]byte(err.Error()))
+      return
+		}
+
+		token, err := utils.GenerateJwt(s.cfg.JwtAccessSecret, jwt.MapClaims{
+			"user": id,
+		})
+
+		if err != nil {
+			s.logger.Error(err)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		//Redirect with token
+		json.NewEncoder(w).Encode(map[string]string{
+			"token": token,
+		})
+	}
+}
+
+func (s *authHandler) LoginWithEmailPassword() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var body domain.LoginUserRequest
+
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			log.Error(err)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		if err := utils.ValidateStruct(body); err != nil {
+			log.Error(err)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		id, err := s.as.Login(r.Context(), &body)
+
+		if err != nil {
+			log.Error(err)
+			w.Write([]byte(err.Error()))
+      return
+		}
+
+		token, err := utils.GenerateJwt(s.cfg.JwtAccessSecret, jwt.MapClaims{
+			"user": id,
+		})
+
+		if err != nil {
+			s.logger.Error(err)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		//Redirect with token
+		json.NewEncoder(w).Encode(map[string]string{
+			"token": token,
+		})
 	}
 }

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -38,7 +39,7 @@ func (h *UserHandler) GetUserById() http.HandlerFunc {
 			return
 		}
 
-		w.Write([]byte(user.Email))
+		json.NewEncoder(w).Encode(user)
 	}
 
 }
