@@ -5,8 +5,8 @@ import (
 	"github.com/novaiiee/serenity/internal/user"
 )
 
-func MapUserRoutes(h user.Handler) func(r chi.Router) {
-  return func(r chi.Router) {
-    r.Get("/{id}", h.GetUserById())
-  }
+func MapUserRoutes(h user.UserHandler) func(r chi.Router) {
+	return func(r chi.Router) {
+		r.Get("/{id}", h.GetUserById())
+	}
 }

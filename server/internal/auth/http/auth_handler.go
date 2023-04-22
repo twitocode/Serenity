@@ -21,7 +21,7 @@ type authHandler struct {
 	logger *log.Logger
 }
 
-func NewAuthHandler(cfg *config.Config, logger *log.Logger, os auth.OauthService, as auth.AuthService) auth.Handler {
+func NewAuthHandler(cfg *config.Config, logger *log.Logger, os auth.OauthService, as auth.AuthService) auth.AuthHandler {
 	return &authHandler{cfg: cfg, os: os, as: as, logger: logger}
 }
 
@@ -101,7 +101,7 @@ func (s *authHandler) RegisterWithEmailPassword() http.HandlerFunc {
 		if err != nil {
 			log.Error(err)
 			w.Write([]byte(err.Error()))
-      return
+			return
 		}
 
 		token, err := utils.GenerateJwt(s.cfg.JwtAccessSecret, jwt.MapClaims{
@@ -142,7 +142,7 @@ func (s *authHandler) LoginWithEmailPassword() http.HandlerFunc {
 		if err != nil {
 			log.Error(err)
 			w.Write([]byte(err.Error()))
-      return
+			return
 		}
 
 		token, err := utils.GenerateJwt(s.cfg.JwtAccessSecret, jwt.MapClaims{

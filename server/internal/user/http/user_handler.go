@@ -13,13 +13,13 @@ import (
 )
 
 type UserHandler struct {
-  cfg *config.Config
-	ur user.UserRepository
-  us user.UserService
-  logger *log.Logger
+	cfg    *config.Config
+	ur     user.UserRepository
+	us     user.UserService
+	logger *log.Logger
 }
 
-func NewUserHandler(cfg *config.Config, logger *log.Logger, userService user.UserService, userRepository user.UserRepository) user.Handler {
+func NewUserHandler(cfg *config.Config, logger *log.Logger, userService user.UserService, userRepository user.UserRepository) user.UserHandler {
 	return &UserHandler{cfg: cfg, ur: userRepository, us: userService, logger: logger}
 }
 

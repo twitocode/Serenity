@@ -2,6 +2,6 @@ package user
 
 import "net/http"
 
-type Handler interface {
+type UserHandler interface {
 	GetUserById() http.HandlerFunc
 }
