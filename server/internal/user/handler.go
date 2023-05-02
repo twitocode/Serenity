@@ -1,4 +1,4 @@
-package http
+package user
 
 import (
 	"encoding/json"
@@ -9,21 +9,25 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi/v5"
 	"github.com/novaiiee/serenity/config"
-	"github.com/novaiiee/serenity/internal/user"
 )
 
-type UserHandler struct {
+type UserHandler interface {
+	GetUserById() http.HandlerFunc
+}
+
+
+type userHandler struct {
 	cfg    *config.Config
-	ur     user.UserRepository
-	us     user.UserService
+	ur     UserRepository
+	us     UserService
 	logger *log.Logger
 }
 
-func NewUserHandler(cfg *config.Config, logger *log.Logger, userService user.UserService, userRepository user.UserRepository) user.UserHandler {
-	return &UserHandler{cfg: cfg, ur: userRepository, us: userService, logger: logger}
+func NewUserHandler(cfg *config.Config, logger *log.Logger, userService UserService, userRepository UserRepository) *userHandler {
+	return &userHandler{cfg: cfg, ur: userRepository, us: userService, logger: logger}
 }
 
-func (h *UserHandler) GetUserById() http.HandlerFunc {
+func (h *userHandler) GetUserById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {

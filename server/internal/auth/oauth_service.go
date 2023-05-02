@@ -1,4 +1,4 @@
-package services
+package auth
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/novaiiee/serenity/config"
-	"github.com/novaiiee/serenity/internal/auth"
 	"github.com/novaiiee/serenity/internal/domain"
 	"golang.org/x/oauth2"
 
@@ -19,12 +18,17 @@ import (
 	"google.golang.org/api/option"
 )
 
+type OauthService interface {
+	HandleExternalLogin(config *oauth2.Config) string
+	HandleExternalCallback(r *http.Request, oauthConfig *oauth2.Config) (*domain.UserInfo, error)
+}
+
 type oauthService struct{
   logger *log.Logger
   cfg *config.Config
 }
 
-func NewOauthService(logger *log.Logger, cfg *config.Config) auth.OauthService {
+func NewOauthService(logger *log.Logger, cfg *config.Config) OauthService {
 	return &oauthService{logger: logger, cfg: cfg}
 }
 

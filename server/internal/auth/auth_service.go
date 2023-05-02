@@ -1,4 +1,4 @@
-package services
+package auth
 
 import (
 	"context"
@@ -7,24 +7,31 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/novaiiee/serenity/config"
-	"github.com/novaiiee/serenity/internal/auth"
+	"github.com/novaiiee/serenity/internal/account"
 	"github.com/novaiiee/serenity/internal/domain"
 	"github.com/novaiiee/serenity/internal/user"
-	"github.com/novaiiee/serenity/pkg/utils"
+	"github.com/novaiiee/serenity/pkg/crypto"
 )
+
+type AuthService interface {
+	ExternalLogin(ctx context.Context, info *domain.UserInfo) (int, error)
+	Register(ctx context.Context, body *domain.RegisterUserRequest) (int, error)
+	Login(ctx context.Context, body *domain.LoginUserRequest) (int, error)
+}
 
 type authService struct {
 	ur     user.UserRepository
+	uar    account.UserAccountRepository
 	cfg    *config.Config
 	logger *log.Logger
 }
 
-func NewAuthService(cfg *config.Config, logger *log.Logger, ur user.UserRepository) auth.AuthService {
-	return &authService{cfg: cfg, ur: ur, logger: logger}
+func NewAuthService(cfg *config.Config, logger *log.Logger, ur user.UserRepository, uar account.UserAccountRepository) AuthService {
+	return &authService{cfg: cfg, ur: ur, logger: logger, uar: uar}
 }
 
 func (s *authService) ExternalLogin(ctx context.Context, info *domain.UserInfo) (int, error) {
-	account, err := s.ur.GetAccountByEmail(ctx, info.Provider, info.Email)
+	account, err := s.uar.GetAccountByEmail(ctx, info.Provider, info.Email)
 
 	if err != nil {
 		fmt.Println("GetAccountByEmail Error")
@@ -59,7 +66,7 @@ func (s *authService) ExternalLogin(ctx context.Context, info *domain.UserInfo) 
 		return 0, err
 	}
 
-	_, err = s.ur.CreateAccountWithInfo(ctx, info, id)
+	_, err = s.uar.CreateAccountWithInfo(ctx, info, id)
 
 	if err != nil {
 		fmt.Println("CreateUserWithInfo Error")
@@ -92,7 +99,7 @@ func (s *authService) Register(ctx context.Context, body *domain.RegisterUserReq
 		return 0, errors.New("user already exists with display_name")
 	}
 
-	hashedPass, err := utils.HashPassword(body.Password)
+	hashedPass, err := crypto.HashPassword(body.Password)
 	if err != nil {
 		return 0, err
 	}
@@ -115,21 +122,21 @@ func (s *authService) Register(ctx context.Context, body *domain.RegisterUserReq
 func (s *authService) Login(ctx context.Context, body *domain.LoginUserRequest) (int, error) {
 	user, err := s.ur.GetUserPasswordByIdentifier(ctx, body.Identifier)
 
-  if err != nil {
-    return 0, err
-  }
+	if err != nil {
+		return 0, err
+	}
 
-  if user == nil {
-    return 0, errors.New("user does not exist")
-  }
+	if user == nil {
+		return 0, errors.New("user does not exist")
+	}
 
-  if !user.Password.Valid {
-    return 0, errors.New("user does not have a password")
-  }
+	if !user.Password.Valid {
+		return 0, errors.New("user does not have a password")
+	}
 
-	if err := utils.CompareHashAndPassword(body.Password, user.Password.String); err != nil {
-    return 0, err
-  }
+	if err := crypto.CompareHashAndPassword(body.Password, user.Password.String); err != nil {
+		return 0, err
+	}
 
 	return user.Id, nil
 }

@@ -1,4 +1,5 @@
-package utils
+package validaton
+
 import "github.com/go-playground/validator/v10"
 
 func ValidateStruct(s interface{}) error {

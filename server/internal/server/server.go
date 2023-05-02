@@ -17,11 +17,9 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/novaiiee/serenity/config"
 	database "github.com/novaiiee/serenity/db"
-	auth "github.com/novaiiee/serenity/internal/auth/http"
-	authServices "github.com/novaiiee/serenity/internal/auth/services"
-	user "github.com/novaiiee/serenity/internal/user/http"
-	userRepository "github.com/novaiiee/serenity/internal/user/repository"
-	userServices "github.com/novaiiee/serenity/internal/user/services"
+	"github.com/novaiiee/serenity/internal/account"
+	auth "github.com/novaiiee/serenity/internal/auth"
+	user "github.com/novaiiee/serenity/internal/user"
 )
 
 type server struct {
@@ -57,11 +55,12 @@ func (s *server) Run(docs *string) {
 	s.r = r
 	s.db = db
 
-	ur := userRepository.NewUserRepository(db)
+	ur := user.NewUserRepository(db)
+	uar := account.NewUserAccountRepository(db)
 
-	oauthService := authServices.NewOauthService(s.logger, s.cfg)
-	userService := userServices.NewUserService(s.logger)
-	authService := authServices.NewAuthService(s.cfg, s.logger, ur)
+	oauthService := auth.NewOauthService(s.logger, s.cfg)
+	userService := user.NewUserService(s.logger)
+	authService := auth.NewAuthService(s.cfg, s.logger, ur, uar)
 
 	uh := user.NewUserHandler(s.cfg, s.logger, userService, ur)
 	ah := auth.NewAuthHandler(s.cfg, s.logger, oauthService, authService)

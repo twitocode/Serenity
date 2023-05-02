@@ -1,14 +1,16 @@
-package services
+package user
 
 import (
 	"github.com/charmbracelet/log"
-	"github.com/novaiiee/serenity/internal/user"
 )
+
+type UserService interface {
+}
 
 type userService struct {
 	logger *log.Logger
 }
 
-func NewUserService(logger *log.Logger) user.UserService {
+func NewUserService(logger *log.Logger) UserService {
 	return &userService{logger: logger}
 }
