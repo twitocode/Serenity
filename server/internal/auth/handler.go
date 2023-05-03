@@ -4,25 +4,24 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi/v5"
 	golangJwt "github.com/golang-jwt/jwt/v5"
 	"github.com/novaiiee/serenity/config"
 	"github.com/novaiiee/serenity/internal/domain"
 	"github.com/novaiiee/serenity/pkg/jwt"
-	"github.com/novaiiee/serenity/pkg/validation"
+	validaton "github.com/novaiiee/serenity/pkg/validation"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 )
 
 type authHandler struct {
-	cfg    *config.Config
-	os     OauthService
-	as     AuthService
-	logger *log.Logger
+	cfg *config.Config
+	os  OauthService
+	as  AuthService
 }
 
-func NewAuthHandler(cfg *config.Config, logger *log.Logger, os OauthService, as AuthService) AuthHandler {
-	return &authHandler{cfg: cfg, os: os, as: as, logger: logger}
+func NewAuthHandler(cfg *config.Config, os OauthService, as AuthService) AuthHandler {
+	return &authHandler{cfg: cfg, os: os, as: as}
 }
 
 func (s *authHandler) getProviderConfigs() map[string]*oauth2.Config {
@@ -50,7 +49,7 @@ func (s *authHandler) ExternalProviderCallback() http.HandlerFunc {
 		userInfo, err := s.os.HandleExternalCallback(r, config)
 
 		if err != nil {
-			s.logger.Error(err)
+			log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -58,7 +57,7 @@ func (s *authHandler) ExternalProviderCallback() http.HandlerFunc {
 		id, err := s.as.ExternalLogin(r.Context(), userInfo)
 
 		if err != nil {
-			s.logger.Error(err)
+			log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -68,7 +67,7 @@ func (s *authHandler) ExternalProviderCallback() http.HandlerFunc {
 		})
 
 		if err != nil {
-			s.logger.Error(err)
+			log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -85,13 +84,13 @@ func (s *authHandler) RegisterWithEmailPassword() http.HandlerFunc {
 		var body domain.RegisterUserRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			log.Error(err)
+			log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
 
 		if err := validaton.ValidateStruct(body); err != nil {
-			log.Error(err)
+			log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -99,7 +98,7 @@ func (s *authHandler) RegisterWithEmailPassword() http.HandlerFunc {
 		id, err := s.as.Register(r.Context(), &body)
 
 		if err != nil {
-			log.Error(err)
+			log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -109,7 +108,7 @@ func (s *authHandler) RegisterWithEmailPassword() http.HandlerFunc {
 		})
 
 		if err != nil {
-			s.logger.Error(err)
+			log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -126,13 +125,13 @@ func (s *authHandler) LoginWithEmailPassword() http.HandlerFunc {
 		var body domain.LoginUserRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			log.Error(err)
+			log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
 
 		if err := validaton.ValidateStruct(body); err != nil {
-			log.Error(err)
+			log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -140,7 +139,7 @@ func (s *authHandler) LoginWithEmailPassword() http.HandlerFunc {
 		id, err := s.as.Login(r.Context(), &body)
 
 		if err != nil {
-			log.Error(err)
+			log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -150,7 +149,7 @@ func (s *authHandler) LoginWithEmailPassword() http.HandlerFunc {
 		})
 
 		if err != nil {
-			s.logger.Error(err)
+			log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}

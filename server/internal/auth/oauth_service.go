@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/charmbracelet/log"
 	"github.com/novaiiee/serenity/config"
 	"github.com/novaiiee/serenity/internal/domain"
 	"golang.org/x/oauth2"
@@ -23,13 +22,12 @@ type OauthService interface {
 	HandleExternalCallback(r *http.Request, oauthConfig *oauth2.Config) (*domain.UserInfo, error)
 }
 
-type oauthService struct{
-  logger *log.Logger
-  cfg *config.Config
+type oauthService struct {
+	cfg    *config.Config
 }
 
-func NewOauthService(logger *log.Logger, cfg *config.Config) OauthService {
-	return &oauthService{logger: logger, cfg: cfg}
+func NewOauthService(cfg *config.Config) OauthService {
+	return &oauthService{ cfg: cfg}
 }
 
 func (s *oauthService) HandleExternalLogin(config *oauth2.Config) string {
@@ -40,7 +38,6 @@ func (s *oauthService) HandleExternalCallback(r *http.Request, oauthConfig *oaut
 	token, err := s.exchangeToken(r.Context(), r.FormValue("state"), r.FormValue("code"), oauthConfig)
 
 	if err != nil {
-		s.logger.Error(err.Error())
 		return nil, err
 	}
 
@@ -48,7 +45,6 @@ func (s *oauthService) HandleExternalCallback(r *http.Request, oauthConfig *oaut
 		userInfo, err := s.getGoogleUserInfo(r.Context(), oauthConfig, token)
 
 		if err != nil {
-			s.logger.Error(err.Error())
 			return nil, err
 		}
 
@@ -59,7 +55,6 @@ func (s *oauthService) HandleExternalCallback(r *http.Request, oauthConfig *oaut
 		userInfo, err := s.getGithubUserInfo(r.Context(), oauthConfig, token)
 
 		if err != nil {
-			s.logger.Error(err.Error())
 			return nil, err
 		}
 
@@ -70,7 +65,6 @@ func (s *oauthService) HandleExternalCallback(r *http.Request, oauthConfig *oaut
 		userInfo, err := s.getDiscordUserInfo(r.Context(), oauthConfig, token)
 
 		if err != nil {
-			s.logger.Error(err.Error())
 			return nil, err
 		}
 

@@ -11,7 +11,7 @@ new-migration:
 	migrate create -ext sql -dir db/migrations -seq $(name)
 
 server:
-	go run cmd/main.go
+	go run cmd/api/main.go
 
 server-docs:
-	go run cmd/main.go -docs=json
+	go run cmd/api/main.go -docs=json
