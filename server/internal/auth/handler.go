@@ -10,7 +10,7 @@ import (
 	"github.com/novaiiee/serenity/internal/domain"
 	"github.com/novaiiee/serenity/pkg/jwt"
 	validaton "github.com/novaiiee/serenity/pkg/validation"
-	"github.com/rs/zerolog/log"
+	"github.com/rs/zerolog"
 	"golang.org/x/oauth2"
 )
 
@@ -18,10 +18,11 @@ type authHandler struct {
 	cfg *config.Config
 	os  OauthService
 	as  AuthService
+	log *zerolog.Logger
 }
 
-func NewAuthHandler(cfg *config.Config, os OauthService, as AuthService) AuthHandler {
-	return &authHandler{cfg: cfg, os: os, as: as}
+func NewAuthHandler(log *zerolog.Logger, cfg *config.Config, os OauthService, as AuthService) AuthHandler {
+	return &authHandler{cfg: cfg, os: os, as: as, log: log}
 }
 
 func (s *authHandler) getProviderConfigs() map[string]*oauth2.Config {
@@ -43,13 +44,21 @@ func (s *authHandler) ExternalProvider() http.HandlerFunc {
 	}
 }
 
+// RootHandler - Returns all the available APIs
+// @Summary This API can be used as health check for this application.
+// @Description Tells if the chi-swagger APIs are working or not.
+// @Tags chi-swagger
+// @Accept  json
+// @Produce  json
+// @Success 200 {string} response "api response"
+// @Router / [get]
 func (s *authHandler) ExternalProviderCallback() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		config := s.getProviderConfigs()[chi.URLParam(r, "provider")]
 		userInfo, err := s.os.HandleExternalCallback(r, config)
 
 		if err != nil {
-			log.Error().Stack().Err(err).Msg("")
+			s.log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -57,7 +66,7 @@ func (s *authHandler) ExternalProviderCallback() http.HandlerFunc {
 		id, err := s.as.ExternalLogin(r.Context(), userInfo)
 
 		if err != nil {
-			log.Error().Stack().Err(err).Msg("")
+			s.log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -67,7 +76,7 @@ func (s *authHandler) ExternalProviderCallback() http.HandlerFunc {
 		})
 
 		if err != nil {
-			log.Error().Stack().Err(err).Msg("")
+			s.log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -84,13 +93,13 @@ func (s *authHandler) RegisterWithEmailPassword() http.HandlerFunc {
 		var body domain.RegisterUserRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			log.Error().Stack().Err(err).Msg("")
+			s.log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
 
 		if err := validaton.ValidateStruct(body); err != nil {
-			log.Error().Stack().Err(err).Msg("")
+			s.log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -98,7 +107,7 @@ func (s *authHandler) RegisterWithEmailPassword() http.HandlerFunc {
 		id, err := s.as.Register(r.Context(), &body)
 
 		if err != nil {
-			log.Error().Stack().Err(err).Msg("")
+			s.log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -108,7 +117,7 @@ func (s *authHandler) RegisterWithEmailPassword() http.HandlerFunc {
 		})
 
 		if err != nil {
-			log.Error().Stack().Err(err).Msg("")
+			s.log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -125,13 +134,13 @@ func (s *authHandler) LoginWithEmailPassword() http.HandlerFunc {
 		var body domain.LoginUserRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			log.Error().Stack().Err(err).Msg("")
+			s.log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
 
 		if err := validaton.ValidateStruct(body); err != nil {
-			log.Error().Stack().Err(err).Msg("")
+			s.log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -139,7 +148,7 @@ func (s *authHandler) LoginWithEmailPassword() http.HandlerFunc {
 		id, err := s.as.Login(r.Context(), &body)
 
 		if err != nil {
-			log.Error().Stack().Err(err).Msg("")
+			s.log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -149,7 +158,7 @@ func (s *authHandler) LoginWithEmailPassword() http.HandlerFunc {
 		})
 
 		if err != nil {
-			log.Error().Stack().Err(err).Msg("")
+			s.log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(err.Error()))
 			return
 		}

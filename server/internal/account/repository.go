@@ -3,7 +3,9 @@ package account
 import (
 	"context"
 	"database/sql"
-	"errors"
+
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/novaiiee/serenity/internal/domain"
@@ -16,11 +18,12 @@ type UserAccountRepository interface {
 }
 
 type userAccountRepository struct {
-	db *sqlx.DB
+	db  *sqlx.DB
+	log *zerolog.Logger
 }
 
-func NewUserAccountRepository(db *sqlx.DB) UserAccountRepository {
-	return &userAccountRepository{db}
+func NewUserAccountRepository(log *zerolog.Logger, db *sqlx.DB) UserAccountRepository {
+	return &userAccountRepository{db: db, log: log}
 }
 
 func (r *userAccountRepository) CreateAccountWithInfo(ctx context.Context, info *domain.UserInfo, userId int) (int, error) {

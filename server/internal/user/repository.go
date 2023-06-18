@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/novaiiee/serenity/internal/domain"
 	"github.com/novaiiee/serenity/pkg/database"
+	"github.com/rs/zerolog"
 )
 
 type UserRepository interface {
@@ -19,11 +20,12 @@ type UserRepository interface {
 }
 
 type userRepository struct {
+  log *zerolog.Logger
 	db *sqlx.DB
 }
 
-func NewUserRepository(db *sqlx.DB) UserRepository {
-	return &userRepository{db}
+func NewUserRepository(log *zerolog.Logger, db *sqlx.DB) UserRepository {
+	return &userRepository{db:db, log:log}
 }
 
 func (r *userRepository) GetUserById(ctx context.Context, id int) (*domain.User, error) {

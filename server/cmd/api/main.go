@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,26 +11,23 @@ import (
 	"github.com/novaiiee/serenity/config"
 	"github.com/novaiiee/serenity/internal/server"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/rs/zerolog/pkgerrors"
 )
 
 var docs = flag.String("docs", "", "Generates routing documentation for RESTful API - markdown, json, or raml.")
 
 func main() {
-	// log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr,}).With().
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+  log := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger()
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
-	// log.Error().Stack().Err(errors.New("You suck balls")).Msg("")
 
 	flag.Parse()
 	cfg, err := config.Get()
 
 	if err != nil {
-		log.Error().Stack().Msg(fmt.Sprintf("There was an error initializing the config: %v", err))
-	}
+    log.Error().Stack().Err(err).Msg("Error with getting config")
+  }
 
-	server := server.NewServer(cfg)
+	server := server.NewServer(&log, cfg)
 	server.Run(docs)
 
 	quit := make(chan os.Signal, 1)

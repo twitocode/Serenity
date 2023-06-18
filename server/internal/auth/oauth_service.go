@@ -3,10 +3,12 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 
 	"github.com/novaiiee/serenity/config"
 	"github.com/novaiiee/serenity/internal/domain"
@@ -23,11 +25,12 @@ type OauthService interface {
 }
 
 type oauthService struct {
-	cfg    *config.Config
+  log *zerolog.Logger
+	cfg *config.Config
 }
 
-func NewOauthService(cfg *config.Config) OauthService {
-	return &oauthService{ cfg: cfg}
+func NewOauthService(log *zerolog.Logger, cfg *config.Config) OauthService {
+	return &oauthService{cfg: cfg, log: log}
 }
 
 func (s *oauthService) HandleExternalLogin(config *oauth2.Config) string {

@@ -2,16 +2,18 @@ package server
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/pkg/errors"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/docgen"
 	"github.com/go-chi/render"
-	"github.com/rs/zerolog/log"
+	"github.com/ironstar-io/chizerolog"
+	"github.com/rs/zerolog"
 	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/jmoiron/sqlx"
@@ -24,17 +26,22 @@ import (
 )
 
 type server struct {
+	log *zerolog.Logger
 	cfg *config.Config
 	db  *sqlx.DB
 	r   *chi.Mux
 }
 
-func NewServer(cfg *config.Config) *server {
-	return &server{cfg: cfg}
+func NewServer(log *zerolog.Logger, cfg *config.Config) *server {
+	return &server{cfg: cfg, log: log}
 }
 
 func (s *server) Run(docs *string) {
 	r := chi.NewRouter()
+
+	if true == false {
+		r.Use(chizerolog.LoggerMiddleware(s.log))
+	}
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"*"},
@@ -42,44 +49,45 @@ func (s *server) Run(docs *string) {
 		AllowCredentials: true,
 	}))
 
-	//r.Use(middleware.Logger)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
-	r.Mount("/swagger", httpSwagger.WrapHandler)
+
 	db, err := database.InitDatabase(s.cfg)
 
-	if err != nil {
-		log.Fatal().Stack().Msg(fmt.Sprintf("Database connection error: %v", err))
+	if err == nil {
+		s.log.Fatal().Stack().Err(err).Msg("")
 	}
 
-	log.Info().Msg("Successfully connected to the Database")
+	s.log.Info().Msg("Successfully connected to the Database")
 
 	s.r = r
 	s.db = db
 
-	ur := user.NewUserRepository(db)
-	uar := account.NewUserAccountRepository(db)
+	ur := user.NewUserRepository(s.log, db)
+	uar := account.NewUserAccountRepository(s.log, db)
 
-	oauthService := auth.NewOauthService(s.cfg)
-	userService := user.NewUserService()
-	authService := auth.NewAuthService(s.cfg, ur, uar)
+	oauthService := auth.NewOauthService(s.log, s.cfg)
+	userService := user.NewUserService(s.log)
+	authService := auth.NewAuthService(s.log, s.cfg, ur, uar)
 
-	uh := user.NewUserHandler(s.cfg, userService, ur)
-	ah := auth.NewAuthHandler(s.cfg, oauthService, authService)
+	uh := user.NewUserHandler(s.log, s.cfg, userService, ur)
+	ah := auth.NewAuthHandler(s.log, s.cfg, oauthService, authService)
 
 	r.Route("/auth", auth.MapAuthRoutes(ah))
 	r.Route("/users", user.MapUserRoutes(uh))
 
+	r.Mount("/swagger", httpSwagger.WrapHandler)
+
 	if *docs == "json" {
-		log.Info().Msg("Generating JSON docs")
+		s.log.Info().Msg("Generating JSON docs")
 		s.GenerateJSONRoutes(r)
 	}
 
 	port := ":" + s.cfg.Port
-	log.Info().Msg(fmt.Sprintf("Running the server on port %v", port))
+	s.log.Info().Msg(fmt.Sprintf("Running the server on port %v", port))
 
 	go func() {
 		if err := http.ListenAndServe("localhost"+port, r); err != nil {
-			log.Fatal().Stack().Msg(fmt.Sprintf("There was an error: %v", err))
+			s.log.Fatal().Stack().Msg(fmt.Sprintf("There was an error: %v", err))
 		}
 	}()
 }
@@ -94,18 +102,18 @@ func (s *server) Shutdown(ctx context.Context) error {
 
 func (s *server) GenerateJSONRoutes(r chi.Router) {
 	if err := os.Remove("routes.json"); err != nil && !errors.Is(err, os.ErrNotExist) {
-		log.Fatal().Stack().Err(err).Msg("")
+		s.log.Fatal().Stack().Err(err).Msg("")
 	}
 
 	f, err := os.Create("routes.json")
 	if err != nil {
-		log.Fatal().Stack().Err(err).Msg("")
+		s.log.Fatal().Stack().Err(err).Msg("")
 	}
 
 	defer f.Close()
 	text := docgen.JSONRoutesDoc(r)
 
 	if _, err = f.Write([]byte(text)); err != nil {
-		log.Fatal().Stack().Err(err).Msg("")
+		s.log.Fatal().Stack().Err(err).Msg("")
 	}
 }

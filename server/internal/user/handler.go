@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/novaiiee/serenity/config"
-	"github.com/rs/zerolog/log"
+	"github.com/rs/zerolog"
 )
 
 type UserHandler interface {
@@ -19,10 +19,11 @@ type userHandler struct {
 	cfg *config.Config
 	ur  UserRepository
 	us  UserService
+	log *zerolog.Logger
 }
 
-func NewUserHandler(cfg *config.Config, userService UserService, userRepository UserRepository) *userHandler {
-	return &userHandler{cfg: cfg, ur: userRepository, us: userService}
+func NewUserHandler(log *zerolog.Logger, cfg *config.Config, userService UserService, userRepository UserRepository) *userHandler {
+	return &userHandler{log: log, cfg: cfg, ur: userRepository, us: userService}
 }
 
 func (h *userHandler) GetUserById() http.HandlerFunc {
@@ -36,7 +37,7 @@ func (h *userHandler) GetUserById() http.HandlerFunc {
 		user, err := h.ur.GetUserById(r.Context(), id)
 
 		if err != nil {
-			log.Error().Stack().Err(err).Msg("")
+			h.log.Error().Stack().Err(err).Msg("")
 			w.Write([]byte(fmt.Sprintf("No user found with the id %d", id)))
 			return
 		}

@@ -2,8 +2,10 @@ package auth
 
 import (
 	"context"
-	"errors"
-  
+
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
+
 	"github.com/novaiiee/serenity/config"
 	"github.com/novaiiee/serenity/internal/account"
 	"github.com/novaiiee/serenity/internal/domain"
@@ -18,13 +20,14 @@ type AuthService interface {
 }
 
 type authService struct {
-	ur     user.UserRepository
-	uar    account.UserAccountRepository
-	cfg    *config.Config
+	ur  user.UserRepository
+	uar account.UserAccountRepository
+	cfg *config.Config
+	log *zerolog.Logger
 }
 
-func NewAuthService(cfg *config.Config, ur user.UserRepository, uar account.UserAccountRepository) AuthService {
-	return &authService{cfg: cfg, ur: ur, uar: uar}
+func NewAuthService(log *zerolog.Logger, cfg *config.Config, ur user.UserRepository, uar account.UserAccountRepository) AuthService {
+	return &authService{cfg: cfg, ur: ur, uar: uar, log: log}
 }
 
 func (s *authService) ExternalLogin(ctx context.Context, info *domain.UserInfo) (int, error) {
@@ -41,7 +44,7 @@ func (s *authService) ExternalLogin(ctx context.Context, info *domain.UserInfo) 
 		}
 
 		if user == nil {
-			return 0, errors.New("User associated with account does not exist")
+			return 0, errors.New("User associated with account does not exist") 
 		}
 
 		return user.Id, nil
