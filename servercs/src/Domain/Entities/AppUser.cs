@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace Serenity.Api.Database.Entities;
+namespace Serenity.Domain.Entities;
 
 public class AppUser : IdentityUser
 {

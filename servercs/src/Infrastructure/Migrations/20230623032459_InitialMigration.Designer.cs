@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Serenity.Api.Database;
+using Serenity.Infrastructure;
 
 #nullable disable
 
-namespace Serenity.Api.Database.Migrations
+namespace Serenity.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
     [Migration("20230623032459_InitialMigration")]

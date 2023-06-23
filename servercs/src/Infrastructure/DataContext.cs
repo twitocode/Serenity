@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Serenity.Api.Database.Entities;
+using Serenity.Domain.Entities;
 
-namespace Serenity.Api.Database;
+namespace Serenity.Infrastructure;
 
 public class DataContext : IdentityDbContext<AppUser>
 {
-
     public DataContext(DbContextOptions<DataContext> options) : base(options)
     {
     }

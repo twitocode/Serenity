@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Serenity.Api.Database.Migrations
+namespace Serenity.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class InitialMigration : Migration
