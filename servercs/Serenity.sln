@@ -3,15 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{198127CC-057F-413D-939A-E2E99156F69C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serenity.Web", "src\Web\Serenity.Web.csproj", "{D4E4FA05-3471-4D9A-BAE3-7A325827F66D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "src\Web\Web.csproj", "{D4E4FA05-3471-4D9A-BAE3-7A325827F66D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serenity.Application", "src\Application\Serenity.Application.csproj", "{D00A43F4-7594-467A-AE20-5EBF34B4A3A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "src\Application\Application.csproj", "{D00A43F4-7594-467A-AE20-5EBF34B4A3A0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serenity.Infrastructure", "src\Infrastructure\Serenity.Infrastructure.csproj", "{120611CF-5572-425A-A775-E82AB8972049}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\Infrastructure\Infrastructure.csproj", "{120611CF-5572-425A-A775-E82AB8972049}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "src\Domain\Domain.csproj", "{A8C31909-966A-4058-AACF-D4CF28133856}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serenity.Domain", "src\Domain\Serenity.Domain.csproj", "{A8C31909-966A-4058-AACF-D4CF28133856}"
 EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution

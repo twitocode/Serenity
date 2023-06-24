@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Serenity.Application.Interfaces;
 using Serenity.Domain.Entities;
 using Serenity.Application.Common.Models;
-using Microsoft.AspNetCore.Http;
 
 namespace Serenity.Application.Identity.Queries.OAuth;
 
@@ -36,14 +35,9 @@ public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuer
         {
             logger.LogError("Error from external provider: {remoteError}", request.RemoteError);
 
-            return new Result<string>
-            {
-                Data = "",
-                Success = false,
-                Errors = new List<ApplicationError> {
-                    new ApplicationError("", $"Error from external provider: {request.RemoteError}")
-                }
-            };
+            return Result<string>.ForError(new List<ApplicationError> {
+                new ApplicationError("", $"Error from external provider: {request.RemoteError}")
+            });
         }
 
         var info = await signInManager.GetExternalLoginInfoAsync();
@@ -52,14 +46,9 @@ public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuer
         {
             logger.LogError("Error loading external login info");
 
-            return new Result<string>
-            {
-                Data = "",
-                Success = false,
-                Errors = new List<ApplicationError> {
-                    new ApplicationError("", $"Error loading external login info")
-                }
-            };
+            return Result<string>.ForError(new List<ApplicationError> {
+                new ApplicationError("", $"Error loading external login info")
+            });
         }
 
         var signInResult = await signInManager.ExternalLoginSignInAsync(info.LoginProvider,
@@ -67,16 +56,11 @@ public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuer
 
         if (!signInResult.Succeeded)
         {
-            logger.LogInformation("Could not log in with {Provider}", info.LoginProvider);
+            logger.LogError("Could not log in with {Provider}", info.LoginProvider);
 
-            return new Result<string>
-            {
-                Data = "",
-                Success = false,
-                Errors = new List<ApplicationError> {
-                    new ApplicationError("", $"Could not log in with {info.LoginProvider}")
-                }
-            };
+            return Result<string>.ForError(new List<ApplicationError> {
+                new ApplicationError("", $"Could not log in with {info.LoginProvider}")
+            });
         }
 
         var email = info.Principal.FindFirstValue(ClaimTypes.Email);
@@ -85,14 +69,9 @@ public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuer
         {
             logger.LogError("Email not found in principal claim");
 
-            return new Result<string>
-            {
-                Data = "",
-                Success = false,
-                Errors = new List<ApplicationError> {
-                    new ApplicationError("", "Email not found in principal claim")
-                }
-            };
+            return Result<string>.ForError(new List<ApplicationError> {
+                new ApplicationError("", "Email not found in principal claim")
+            });
         }
 
         var user = await userManager.FindByEmailAsync(email);
@@ -109,13 +88,9 @@ public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuer
         }
 
         string token = jwtService.CreateToken(user);
-        logger.LogInformation("JWT token generated {token}", token);
 
         await userManager.AddLoginAsync(user, info);
         await signInManager.SignInAsync(user, isPersistent: false);
-
-
-        logger.LogInformation("Successfully logged in {Email}", user.Email);
 
         return new Result<string>
         {

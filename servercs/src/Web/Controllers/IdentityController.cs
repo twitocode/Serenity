@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Serenity.Application.Common.Models;
 using Serenity.Application.Identity.Queries.OAuth;
 using Serenity.Application.Interfaces;
 using Serenity.Domain.Entities;
@@ -17,15 +18,11 @@ public class IdentityController : ApiController
 {
     private readonly ILogger<IdentityController> logger;
     private readonly SignInManager<AppUser> signInManager;
-    private readonly UserManager<AppUser> userManager;
-    private readonly IJwtService jwtService;
 
-    public IdentityController(ILogger<IdentityController> logger, SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IJwtService jwtService)
+    public IdentityController(ILogger<IdentityController> logger, SignInManager<AppUser> signInManager)
     {
         this.logger = logger;
         this.signInManager = signInManager;
-        this.userManager = userManager;
-        this.jwtService = jwtService;
     }
 
     [HttpGet("{provider}")]
@@ -55,6 +52,23 @@ public class IdentityController : ApiController
 
         if (!result.Success)
         {
+            return BadRequest(result.Errors);
+        }
+
+        return Ok(result.Data);
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> RegisterUser([FromBody] RegisterUserCommand command)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest("errors i dunno ");
+        }
+
+        Result<string> result =await Mediator.Send(command);
+        
+        if (!result.Success) {
             return BadRequest(result.Errors);
         }
 

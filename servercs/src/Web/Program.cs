@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, configuration) =>
 {
-    configuration.WriteTo.Console().MinimumLevel.Information();
+    configuration.WriteTo.Console().MinimumLevel.Debug();
 });
 
 builder.Services.AddApplicationServices(builder.Configuration);
