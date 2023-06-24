@@ -18,7 +18,7 @@ public class JwtService : IJwtService
         this.configuration = configuration;
     }
 
-    public string CreateToken(AppUser user)
+    public string CreateToken(ApplicationUser user)
     {
         var expiration = DateTime.UtcNow.AddMinutes(ExpirationMinutes);
         var token = CreateJwtToken(
@@ -40,13 +40,13 @@ public class JwtService : IJwtService
             signingCredentials: credentials
         );
 
-    private static List<Claim> CreateClaims(AppUser user)
+    private static List<Claim> CreateClaims(ApplicationUser user)
     {
         try
         {
             var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(ClaimTypes.Name, user.UserName ?? ""),
                     new Claim(ClaimTypes.Email, user.Email ?? "")
                 };

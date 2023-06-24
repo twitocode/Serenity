@@ -9,9 +9,9 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/Serenity.Api/bin/Debug/net7.0/Serenity.Api.dll",
+      "program": "${workspaceFolder}/src/Web/bin/Debug/net7.0/Serenity.Web.dll",
       "args": [],
-      "cwd": "${workspaceFolder}/Serenity.Api",
+      "cwd": "${workspaceFolder}/src/Web",
       "stopAtEntry": false,
       "serverReadyAction": {
         "action": "openExternally",

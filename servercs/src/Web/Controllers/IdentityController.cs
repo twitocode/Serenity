@@ -17,9 +17,9 @@ namespace Serenity.Controllers;
 public class IdentityController : ApiController
 {
     private readonly ILogger<IdentityController> logger;
-    private readonly SignInManager<AppUser> signInManager;
+    private readonly SignInManager<ApplicationUser> signInManager;
 
-    public IdentityController(ILogger<IdentityController> logger, SignInManager<AppUser> signInManager)
+    public IdentityController(ILogger<IdentityController> logger, SignInManager<ApplicationUser> signInManager)
     {
         this.logger = logger;
         this.signInManager = signInManager;
@@ -50,28 +50,13 @@ public class IdentityController : ApiController
             ReturnUrl = returnUrl ?? Url.Content("~/")
         });
 
-        if (!result.Success)
-        {
-            return BadRequest(result.Errors);
-        }
-
-        return Ok(result.Data);
+        return StatusCode(result.StatusCode, result);
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> RegisterUser([FromBody] RegisterUserCommand command)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest("errors i dunno ");
-        }
-
-        Result<string> result =await Mediator.Send(command);
-        
-        if (!result.Success) {
-            return BadRequest(result.Errors);
-        }
-
-        return Ok(result.Data);
+        Result<string> result = await Mediator.Send(command);
+        return StatusCode(result.StatusCode, result);
     }
 }

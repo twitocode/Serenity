@@ -2,13 +2,14 @@ using Serilog;
 using Microsoft.OpenApi.Models;
 using Serenity.Application;
 using Serenity.Infrastructure;
+using Serenity.Infrastructure.Persistence;
 using Serenity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, configuration) =>
 {
-    configuration.WriteTo.Console().MinimumLevel.Debug();
+    configuration.WriteTo.Console().MinimumLevel.Information();
 });
 
 builder.Services.AddApplicationServices(builder.Configuration);

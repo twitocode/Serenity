@@ -2,9 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using Serenity.Application.Interfaces;
 using Serenity.Application.Services;
 using Serenity.Domain.Entities;
+using Serenity.Infrastructure.Persistence;
 
 namespace Serenity.Infrastructure;
 
@@ -12,11 +14,15 @@ public static class ConfigureInfrastructure
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration config)
     {
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(config.GetConnectionString("DB"));
+        dataSourceBuilder.UseNodaTime();
+        var dataSource = dataSourceBuilder.Build();
+        
         services.AddDbContext<DataContext>(options =>
-            options.UseNpgsql(config.GetConnectionString("DB"))
+            options.UseNpgsql(dataSource, o => o.UseNodaTime())
         );
 
-        services.AddIdentity<AppUser, IdentityRole>(options =>
+        services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
         {
             options.Password.RequireDigit = true;
             options.Password.RequireLowercase = true;

@@ -4,5 +4,5 @@ namespace Serenity.Application.Interfaces;
 
 public interface IJwtService
 {
-    string CreateToken(AppUser user);
+    string CreateToken(ApplicationUser user);
 }

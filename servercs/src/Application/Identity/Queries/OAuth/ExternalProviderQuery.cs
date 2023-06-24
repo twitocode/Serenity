@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Serenity.Application.Interfaces;
 using Serenity.Domain.Entities;
 using Serenity.Application.Common.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Serenity.Application.Identity.Queries.OAuth;
 
@@ -17,11 +18,11 @@ public record ExternalProviderQuery : IRequest<Result<string>>
 public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuery, Result<string>>
 {
     private readonly ILogger<ExternalProviderQuery> logger;
-    private readonly SignInManager<AppUser> signInManager;
-    private readonly UserManager<AppUser> userManager;
+    private readonly SignInManager<ApplicationUser> signInManager;
+    private readonly UserManager<ApplicationUser> userManager;
     private readonly IJwtService jwtService;
 
-    public ExternalProviderQueryHandler(ILogger<ExternalProviderQuery> logger, SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IJwtService jwtService)
+    public ExternalProviderQueryHandler(ILogger<ExternalProviderQuery> logger, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IJwtService jwtService)
     {
         this.logger = logger;
         this.signInManager = signInManager;
@@ -35,7 +36,7 @@ public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuer
         {
             logger.LogError("Error from external provider: {remoteError}", request.RemoteError);
 
-            return Result<string>.ForError(new List<ApplicationError> {
+            return Result<string>.ForError(StatusCodes.Status500InternalServerError, new List<ApplicationError> {
                 new ApplicationError("", $"Error from external provider: {request.RemoteError}")
             });
         }
@@ -46,7 +47,7 @@ public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuer
         {
             logger.LogError("Error loading external login info");
 
-            return Result<string>.ForError(new List<ApplicationError> {
+            return Result<string>.ForError(StatusCodes.Status500InternalServerError, new List<ApplicationError> {
                 new ApplicationError("", $"Error loading external login info")
             });
         }
@@ -54,14 +55,16 @@ public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuer
         var signInResult = await signInManager.ExternalLoginSignInAsync(info.LoginProvider,
             info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
 
-        if (!signInResult.Succeeded)
-        {
-            logger.LogError("Could not log in with {Provider}", info.LoginProvider);
+        //If user does not exist
+        //TODO - FIX LATER
+        // if (!signInResult.Succeeded)
+        // {
+        //     logger.LogError("Could not log in with {Provider}", info.LoginProvider);
 
-            return Result<string>.ForError(new List<ApplicationError> {
-                new ApplicationError("", $"Could not log in with {info.LoginProvider}")
-            });
-        }
+        //     return Result<string>.ForError(StatusCodes.Status500InternalServerError, new List<ApplicationError> {
+        //         new ApplicationError("", $"Could not log in with {info.LoginProvider}")
+        //     });
+        // }
 
         var email = info.Principal.FindFirstValue(ClaimTypes.Email);
 
@@ -69,7 +72,7 @@ public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuer
         {
             logger.LogError("Email not found in principal claim");
 
-            return Result<string>.ForError(new List<ApplicationError> {
+            return Result<string>.ForError(StatusCodes.Status400BadRequest, new List<ApplicationError> {
                 new ApplicationError("", "Email not found in principal claim")
             });
         }
@@ -78,7 +81,7 @@ public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuer
 
         if (user is null)
         {
-            user = new AppUser
+            user = new ApplicationUser
             {
                 UserName = info.Principal.FindFirstValue(ClaimTypes.Email),
                 Email = info.Principal.FindFirstValue(ClaimTypes.Email)
