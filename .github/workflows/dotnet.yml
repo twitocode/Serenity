@@ -23,6 +23,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore --project servercs/src/Web/Serenity.Web.csproj
+      run: dotnet build --no-restore --project ../../servercs/src/Web/Serenity.Web.csproj
     - name: Test
-      run: dotnet test --no-build --verbosity normal --project servercs/src/Web/Serenity.Web.csproj
+      run: dotnet test --no-build --verbosity normal --project ../../servercs/src/Web/Serenity.Web.csproj
