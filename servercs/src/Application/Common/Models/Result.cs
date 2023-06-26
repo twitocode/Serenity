@@ -11,4 +11,8 @@ public record Result<T>
     {
         return new Result<T> { Success = false, Data = default!, Errors = errors, StatusCode = code };
     }
+    public static Result<T> ForSuccess(T data)
+    {
+        return new Result<T> { Success = true, Data = data, Errors = new List<ApplicationError> { }, StatusCode = 200 };
+    }
 }

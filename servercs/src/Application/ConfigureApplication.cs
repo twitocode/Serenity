@@ -7,13 +7,11 @@ using Serenity.Application.Identity.Queries.OAuth;
 
 namespace Serenity.Application;
 
-public static class ConfigureApplication
-{
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
-    {
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-        services.AddScoped<IValidator<RegisterUserCommand>, RegisterUserCommandValidator>();
+public static class ConfigureApplication {
+	public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config) {
+		services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+		services.AddScoped<IValidator<RegisterUserCommand>, RegisterUserCommandValidator>();
 
-        return services;
-    }
+		return services;
+	}
 }

@@ -13,8 +13,8 @@ using Serenity.Infrastructure.Persistence;
 namespace Serenity.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230624182754_MainEntitiesRelationships")]
-    partial class MainEntitiesRelationships
+    [Migration("20230626135028_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -225,7 +225,7 @@ namespace Serenity.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Activity");
+                    b.ToTable("Activities");
                 });
 
             modelBuilder.Entity("Serenity.Domain.Entities.ApplicationUser", b =>
@@ -246,6 +246,11 @@ namespace Serenity.Infrastructure.Persistence.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
+
+                    b.Property<Instant>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(NodaTime.Instant.FromUnixTimeTicks(0L));
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -285,6 +290,11 @@ namespace Serenity.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
+
+                    b.Property<Instant>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(NodaTime.Instant.FromUnixTimeTicks(0L));
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -326,7 +336,7 @@ namespace Serenity.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Feeling");
+                    b.ToTable("Feelings");
                 });
 
             modelBuilder.Entity("Serenity.Domain.Entities.Illness", b =>
@@ -353,7 +363,7 @@ namespace Serenity.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Illness");
+                    b.ToTable("Illnesses");
                 });
 
             modelBuilder.Entity("Serenity.Domain.Entities.JournalEntry", b =>
@@ -390,7 +400,7 @@ namespace Serenity.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("JournalEntry");
+                    b.ToTable("JournalEntries");
                 });
 
             modelBuilder.Entity("Serenity.Domain.Entities.Mood", b =>
@@ -417,7 +427,7 @@ namespace Serenity.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Mood");
+                    b.ToTable("Moods");
                 });
 
             modelBuilder.Entity("Serenity.Domain.Entities.UserStats", b =>
@@ -450,7 +460,7 @@ namespace Serenity.Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserStats");
+                    b.ToTable("Stats");
                 });
 
             modelBuilder.Entity("ActivityJournalEntry", b =>
@@ -557,10 +567,12 @@ namespace Serenity.Infrastructure.Persistence.Migrations
                                 .HasColumnType("uuid");
 
                             b1.Property<string>("Gender")
-                                .HasColumnType("text");
+                                .HasColumnType("text")
+                                .HasColumnName("Gender");
 
                             b1.Property<string>("Pronouns")
-                                .HasColumnType("text");
+                                .HasColumnType("text")
+                                .HasColumnName("Pronouns");
 
                             b1.HasKey("ApplicationUserId");
 

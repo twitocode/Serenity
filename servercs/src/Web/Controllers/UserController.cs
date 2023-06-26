@@ -9,19 +9,16 @@ namespace Serenity.Web.Controllers;
 [Route("user")]
 [Produces("application/json")]
 [ApiExplorerSettings(GroupName = "User")]
-public class UserController : ControllerBase
-{
-    private readonly ILogger<UserController> logger;
-    public UserController(ILogger<UserController> logger)
-    {
-        this.logger = logger;
-    }
+public class UserController : ControllerBase {
+	private readonly ILogger<UserController> logger;
+	public UserController(ILogger<UserController> logger) {
+		this.logger = logger;
+	}
 
-    [HttpGet("protected")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public IActionResult Protected()
-    {
+	[HttpGet("protected")]
+	[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+	public IActionResult Protected() {
 
-        return Ok("This is protected!");
-    }
+		return Ok("This is protected!");
+	}
 }
