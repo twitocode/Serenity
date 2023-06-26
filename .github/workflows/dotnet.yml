@@ -8,10 +8,12 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
+    
 jobs:
   build:
-
+    defaults:
+      run:
+        working-directory: servercs
     runs-on: ubuntu-latest
 
     steps:
@@ -23,6 +25,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore --project ../../servercs/src/Web/Serenity.Web.csproj
+      run: dotnet build --no-restore --project .src/Web/Serenity.Web.csproj
     - name: Test
-      run: dotnet test --no-build --verbosity normal --project ../../servercs/src/Web/Serenity.Web.csproj
+      run: dotnet test --no-build --verbosity normal --project src/Web/Serenity.Web.csproj
