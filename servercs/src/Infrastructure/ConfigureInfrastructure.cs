@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Serenity.Application.Interfaces;
-using Serenity.Application.Services;
+using Serenity.Infrastructure.Services;
 using Serenity.Domain.Entities;
 using Serenity.Infrastructure.Persistence;
 
@@ -34,6 +34,7 @@ public static class ConfigureInfrastructure {
 
 		services.AddSingleton<IJwtService, JwtService>();
 		services.AddTransient<IDataContext, DataContext>();
+		services.AddSingleton<ICacheService, RedisService>();
 
 		return services;
 	}

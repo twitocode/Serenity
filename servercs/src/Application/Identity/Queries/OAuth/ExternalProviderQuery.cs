@@ -75,12 +75,14 @@ public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuer
 		if (user is null) {
 			user = new ApplicationUser {
 				UserName = info.Principal.FindFirstValue(ClaimTypes.Email),
-				Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+				Email = info.Principal.FindFirstValue(ClaimTypes.Email),
+				Id = Guid.NewGuid()
 			};
 
 			await userManager.CreateAsync(user);
 		}
 
+		logger.LogInformation("{@user}", user);
 		string token = jwtService.CreateToken(user);
 		await userManager.AddLoginAsync(user, info);
 		await signInManager.SignInAsync(user, isPersistent: false);

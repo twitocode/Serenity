@@ -2,7 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Serenity.Application.Interfaces;
 using Serenity.Domain.Entities;
 
-namespace Serenity.Application.Services;
+namespace Serenity.Infrastructure.Services;
 
 public class IdentityService
 {

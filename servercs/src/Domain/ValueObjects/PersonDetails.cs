@@ -4,8 +4,8 @@ namespace Serenity.Domain.ValueObjects;
 
 [Owned]
 public class PersonDetails : ValueObject {
-	public string Gender { get; private set; } = null!;
-	public string Pronouns { get; private set; } = null!;
+	public string Gender { get; init; } = null!;
+	public string Pronouns { get; init; } = null!;
 	public PersonDetails() { }
 
 	public PersonDetails(string gender, string pronouns) {
