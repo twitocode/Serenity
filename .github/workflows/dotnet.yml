@@ -25,6 +25,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build ./servercs/Serenity.sln --no-restore 
+      run: dotnet build ./Serenity.sln --no-restore 
     - name: Test
-      run: dotnet test ./servercs/Serenity.sln --no-build --verbosity normal
+      run: dotnet test ./Serenity.sln --no-build --verbosity normal
