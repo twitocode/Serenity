@@ -27,6 +27,17 @@ public class JwtService : IJwtService {
 		return tokenHandler.WriteToken(token);
 	}
 
+	public ApplicationUser ReadToken(string token) {
+		var tokenHandler = new JwtSecurityTokenHandler();
+		JwtSecurityToken securityToken = tokenHandler.ReadJwtToken(token);
+
+		return new ApplicationUser {
+			UserName = securityToken.Claims.First(claim => claim.Type == ClaimTypes.Name).Value,
+			Email = securityToken.Claims.First(claim => claim.Type == ClaimTypes.Email).Value,
+			Id = new Guid(securityToken.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value),
+		};
+	}
+
 	private JwtSecurityToken CreateJwtToken(List<Claim> claims, SigningCredentials credentials,
 		DateTime expiration) =>
 		new(

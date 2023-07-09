@@ -13,7 +13,7 @@ namespace Serenity.Application.Identity.Commands.Register.OAuth;
 
 public record OAuthRegisterUserCommand : IRequest<Result<string>> {
 	public string DisplayName { get; set; } = default!;
-	public string OauthUserID { get; set; } = default!;
+	public string? Token { get; set; } = default;
 }
 
 public class OAuthRegisterUserCommandHandler : IRequestHandler<OAuthRegisterUserCommand, Result<string>> {
@@ -47,8 +47,8 @@ public class OAuthRegisterUserCommandHandler : IRequestHandler<OAuthRegisterUser
 
 			return Result<string>.ForError(StatusCodes.Status400BadRequest, errors);
 		}
-
-		var oauthUser = await userManager.FindByIdAsync(request.OauthUserID);
+		var user = jwtService.ReadToken(request.Token!);
+		var oauthUser = await userManager.FindByIdAsync(user.Id.ToString());
 
 		if (oauthUser is null) {
 			return Result<string>.ForError(StatusCodes.Status500InternalServerError, new List<ApplicationError> {
@@ -91,6 +91,6 @@ public class OAuthRegisterUserCommandHandler : IRequestHandler<OAuthRegisterUser
 		}
 
 		string token = jwtService.CreateToken(cachedUser);
-		return Result<string>.ForSuccess(token);
+		return Result<string>.ForSuccess(201, token);
 	}
 }

@@ -6,18 +6,19 @@ using Serenity.Application.Identity.Commands.Register.Email;
 using Serenity.Application.Identity.Commands.Register.DisplayName;
 using Serenity.Application.Identity.Commands.Register.UserDetails;
 using Serenity.Application.Identity.Commands.Register.OAuth;
+using Serenity.Application.Identity.Commands.Login.Local;
 
 namespace Serenity.Application;
 
 public static class ConfigureApplication {
 	public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config) {
 		services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-
-		services.AddScoped<IValidator<EmailRegisterUserCommand>, EmailRegisterUserCommandValidator>();
-		services.AddScoped<IValidator<DisplayNameRegisterUserCommand>, DisplayNameRegisterUserCommandValidator>();
-		services.AddScoped<IValidator<UserDetailsRegisterUserCommand>, UserDetailsRegisterUserCommandValidator>();
-		services.AddScoped<IValidator<OAuthRegisterUserCommand>, OAuthRegisterUserCommandValidator>();
-
+		services.AddTransient<IValidator<EmailRegisterUserCommand>, EmailRegisterUserCommandValidator>();
+		services.AddTransient<IValidator<DisplayNameRegisterUserCommand>, DisplayNameRegisterUserCommandValidator>();
+		services.AddTransient<IValidator<UserDetailsRegisterUserCommand>, UserDetailsRegisterUserCommandValidator>();
+		services.AddTransient<IValidator<OAuthRegisterUserCommand>, OAuthRegisterUserCommandValidator>();
+		services.AddTransient<IValidator<LocalLoginCommand>, LocalLoginCommandValidator>();
+		
 		return services;
 	}
 }

@@ -8,5 +8,4 @@ public class JournalEntry : BaseEntity {
 	public List<Feeling> Feelings { get; private set; } = new List<Feeling>();
 	public List<Activity> Activities { get; private set; } = new List<Activity>();
 	public ApplicationUser User { get; set; }
-
 }

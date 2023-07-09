@@ -13,10 +13,10 @@ using Serenity.Domain.ValueObjects;
 namespace Serenity.Application.Identity.Commands.Register.UserDetails;
 
 public record UserDetailsRegisterUserCommand : IRequest<Result<string>> {
-	public string Email { get; set; } = default!;
 	public string AvatarUrl { get; set; } = default!;
 	public string Pronouns { get; set; } = default!;
 	public string Gender { get; set; } = default!;
+	public string? Token {get;set;} = default;
 }
 
 public class UserDetailsRegisterUserCommandHandler : IRequestHandler<UserDetailsRegisterUserCommand, Result<string>> {
@@ -54,7 +54,8 @@ public class UserDetailsRegisterUserCommandHandler : IRequestHandler<UserDetails
 			return Result<string>.ForError(StatusCodes.Status400BadRequest, errors);
 		}
 
-		var cachedUser = cache.GetData<RedisUser>($"create-user:{request.Email}");
+		var userFromToken = jwtService.ReadToken(request.Token!);
+		var cachedUser = cache.GetData<RedisUser>($"create-user:{userFromToken.Email}");
 
 		//User is already in cache
 		if (cachedUser is null) {
@@ -110,6 +111,6 @@ public class UserDetailsRegisterUserCommandHandler : IRequestHandler<UserDetails
 		}
 
 		string token = jwtService.CreateToken(user);
-		return Result<string>.ForSuccess(token);
+		return Result<string>.ForSuccess(201, token);
 	}
 }

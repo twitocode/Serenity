@@ -84,9 +84,16 @@ public class ExternalProviderQueryHandler : IRequestHandler<ExternalProviderQuer
 
 		logger.LogInformation("{@user}", user);
 		string token = jwtService.CreateToken(user);
-		await userManager.AddLoginAsync(user, info);
+		var result = await userManager.AddLoginAsync(user, info);
+
+		if (!result.Succeeded) {
+			return Result<string>.ForError(StatusCodes.Status400BadRequest, new List<ApplicationError> {
+				new ApplicationError("UserAddOAuth", "Could not add OAuth info to user")
+			});
+		}
+
 		await signInManager.SignInAsync(user, isPersistent: false);
 
-		return Result<string>.ForSuccess($"Successfully logged in {user.Email}, {token}");
+		return Result<string>.ForSuccess(200, $"Successfully logged in {user.Email}, {token}");
 	}
 }

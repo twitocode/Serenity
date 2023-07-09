@@ -12,9 +12,9 @@ using Serenity.Domain.Entities.Redis;
 namespace Serenity.Application.Identity.Commands.Register.DisplayName;
 
 public record DisplayNameRegisterUserCommand : IRequest<Result<string>> {
-	public string DisplayName { get; set; } = default!;
-	public string Email { get; set; } = default!;
-	public string Password { get; set; } = default!;
+	public string? DisplayName { get; set; } = default;
+	public string? Password { get; set; } = default;
+	public string? Token { get; set; } = default;
 }
 
 public class DisplayNameRegisterUserCommandHandler : IRequestHandler<DisplayNameRegisterUserCommand, Result<string>> {
@@ -49,7 +49,8 @@ public class DisplayNameRegisterUserCommandHandler : IRequestHandler<DisplayName
 			return Result<string>.ForError(StatusCodes.Status400BadRequest, errors);
 		}
 
-		var cachedUser = cache.GetData<RedisUser>($"create-user:{request.Email}");
+		var tokenUser = jwtService.ReadToken(request.Token!);
+		var cachedUser = cache.GetData<RedisUser>($"create-user:{tokenUser.Email}");
 
 		//User is already in cache
 		if (cachedUser is null) {
@@ -58,7 +59,7 @@ public class DisplayNameRegisterUserCommandHandler : IRequestHandler<DisplayName
 			});
 		}
 
-		var user = await userManager.FindByNameAsync(request.DisplayName);
+		var user = await userManager.FindByNameAsync(request.DisplayName!);
 
 		if (user is not null) {
 			return Result<string>.ForError(StatusCodes.Status400BadRequest, new List<ApplicationError> {
@@ -77,7 +78,7 @@ public class DisplayNameRegisterUserCommandHandler : IRequestHandler<DisplayName
 		cachedUser.UserName = request.DisplayName;
 		cachedUser.Password = request.Password;
 
-		bool isSet = cache.SetData($"create-user:{request.Email}", cachedUser, cachedUser.ExpirationTime);
+		bool isSet = cache.SetData($"create-user:{cachedUser.Email}", cachedUser, cachedUser.ExpirationTime);
 
 		if (!isSet) {
 			return Result<string>.ForError(StatusCodes.Status500InternalServerError, new List<ApplicationError> {
@@ -86,6 +87,6 @@ public class DisplayNameRegisterUserCommandHandler : IRequestHandler<DisplayName
 		}
 
 		string token = jwtService.CreateToken(cachedUser);
-		return Result<string>.ForSuccess(token);
+		return Result<string>.ForSuccess(200, token);
 	}
 }

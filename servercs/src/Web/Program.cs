@@ -11,12 +11,12 @@ builder.Host.UseSerilog((context, configuration) => {
 	configuration.WriteTo.Console().MinimumLevel.Information();
 });
 
-builder.Services.AddApplicationServices(builder.Configuration);
-builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration);
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
+builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Services.AddSwaggerGen(option => {
 	option.SwaggerDoc("v1", new OpenApiInfo { Title = "Serenity Backend", Version = "v1" });
@@ -46,17 +46,12 @@ builder.Services.AddSwaggerGen(option => {
 
 var app = builder.Build();
 
-app.UseCookiePolicy(new CookiePolicyOptions() {
-	MinimumSameSitePolicy = SameSiteMode.Lax
-});
-
 using (var scope = app.Services.CreateScope()) {
 	var services = scope.ServiceProvider;
 
 	var context = services.GetRequiredService<DataContext>();
 	context.Database.EnsureCreated();
 }
-
 
 // app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -71,4 +66,5 @@ if (app.Environment.IsDevelopment()) {
 		options.RoutePrefix = string.Empty;
 	});
 }
+
 app.Run();

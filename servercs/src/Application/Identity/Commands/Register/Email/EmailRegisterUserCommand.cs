@@ -77,6 +77,6 @@ public class EmailRegisterUserCommandHandler : IRequestHandler<EmailRegisterUser
 		}
 
 		string token = jwtService.CreateToken(cachedUser);
-		return Result<string>.ForSuccess(token);
+		return Result<string>.ForSuccess(200, token);
 	}
 }
